@@ -9,7 +9,7 @@
 
 ![air_bud_-_golden_receiver](https://cloud.githubusercontent.com/assets/26752/3387034/c4cc56d0-fc79-11e3-8d0a-09ef9280bb0f.jpg)
 
-Airbud is a wrapper around [request](https://www.npmjs.org/package/request) with support for for handling JSON, retries with exponential backoff &amp; injecting fixtures. This will save you some boilerplate and allow you to easier test your applications, as they don't have to rely on external HTTP calls.
+Airbud is a wrapper around [request](https://www.npmjs.org/package/request) with support for for handling JSON, retries with exponential backoff &amp; injecting fixtures. This will save you some boilerplate and allow you to easier test your applications.
 
 ## Example
 
@@ -19,13 +19,12 @@ Using [environment variables](https://github.com/kvz/environmental), your produc
 
 Now just let `Airbud.fetch` the `process.env.GITHUB_EVENTS_ENDPOINT`, and it will either retrieve the fixture, or the real thing, depending which environment you are in.
 
-This makes it easy to test your app's depending functions, without having to worry about GitHub ratelimiting, downtime, or sloth when running your tests. All of this while without making your app aware or changing it's flow.
+This makes it easy to test your app's depending functions, without having to worry about GitHub ratelimiting, downtime, or sloth when running your tests. All of this without making your app aware, or changing it's flow.
 
 ```javascript
 var Airbud = require("airbud");
 var opts   = {
-  url    : process.env.GITHUB_EVENTS_ENDPOINT,
-  retries: 3
+  url: process.env.GITHUB_EVENTS_ENDPOINT,
 };
 
 Airbud.fetch (opts, function (err, events, info) {
@@ -38,9 +37,24 @@ Airbud.fetch (opts, function (err, events, info) {
   console.log('Some auto-parsed JSON: ' + events[0].created_at);
 });
 ```
-Ofcourse, you don't have to use environment vars if you don't want to. You can also use Airbud as a wrapper around request, to profit from retries with exponential backoffs.
 
-Some other tricks that Airbud contains are `expectedKey` and `expectedStatus`, to make it error out when you get invalid data, without you writing all extra `if` and maybes.
+Ofcourse, you don't have to use environment vars if you don't want to. You can also use Airbud as a wrapper around request to profit from retries with exponential backoffs. In CoffeeScript:
+
+```coffeescript
+Airbud = require "airbud"
+opts   =
+  retries: 3
+  url    : "https://api.github.com/events"
+};
+
+Airbud.fetch opts, (err, events, info) ->
+  if err
+    throw err
+
+  console.log events
+```
+
+Some other tricks up Airbud's sleeves are `expectedKey` and `expectedStatus`, to make it error out when you get invalid data, without you writing all the extra `if` and maybes.
 
 ## Install
 
