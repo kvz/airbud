@@ -4,8 +4,10 @@
   "description": "The golden receiver. A node module for making http request, with boilerplate for handling json, retries & injecting fixtures",
   "keywords": [
     "http",
-    "json",
     "request",
+    "json",
+    "retries",
+    "testing",
     "fixtures"
   ],
   "author": "Kevin van Zonneveld <kevin@vanzonneveld.net>",
