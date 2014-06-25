@@ -15,7 +15,7 @@ Airbud is a wrapper around [request](https://www.npmjs.org/package/request) with
 
 Say you're writing an app that among things, retrieves public events from the GitHub API.
 
-Using [environment variables](https://npmjs.org/package/environmental), your production environment will have a `GITHUB_EVENTS_ENDPOINT` of `"https://api.github.com/events"`, but when you `source envs/test.sh`, it can be `"file://./fixtures/github-events.json"`.
+Using [environment variables](https://github.com/kvz/environmental), your production environment will have a `GITHUB_EVENTS_ENDPOINT` of `"https://api.github.com/events"`, but when you `source envs/test.sh`, it can be `"file://./fixtures/github-events.json"`.
 
 Now just let `Airbud.fetch` the `process.env.GITHUB_EVENTS_ENDPOINT`, and it will either retrieve the fixture, or the real thing, depending which environment you are in.
 
