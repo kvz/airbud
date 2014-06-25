@@ -15,16 +15,16 @@ Airbud is a wrapper around [request](https://www.npmjs.org/package/request) with
 
 Say you're writing an app that among things, retrieves public events from the GitHub API.
 
-Using [environment variables](https://npmjs.org/package/environmental), your production environment will have a `GITHUB_ENDPOINT` of `"https://api.github.com/events"`, but when you `source envs/test.sh`, it can be `"file://./fixtures/github-events.json"`.
+Using [environment variables](https://npmjs.org/package/environmental), your production environment will have a `GITHUB_EVENTS_ENDPOINT` of `"https://api.github.com/events"`, but when you `source envs/test.sh`, it can be `"file://./fixtures/github-events.json"`.
 
-Now just let `Airbud.fetch` the `process.env.GITHUB_ENDPOINT`, and it will either retrieve the fixture, or the real thing, depending which environment you are in.
+Now just let `Airbud.fetch` the `process.env.GITHUB_EVENTS_ENDPOINT`, and it will either retrieve the fixture, or the real thing, depending which environment you are in.
 
 This makes it easy to test your app's depending functions, without having to worry about GitHub ratelimiting, downtime, or sloth when running your tests. All of this while without making your app aware or changing it's flow.
 
 ```javascript
 var Airbud = require("airbud");
 var opts   = {
-  url    : process.env.GITHUB_ENDPOINT,
+  url    : process.env.GITHUB_EVENTS_ENDPOINT,
   retries: 3
 };
 
