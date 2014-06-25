@@ -38,8 +38,9 @@ Airbud.fetch (opts, function (err, events, info) {
   console.log('Some auto-parsed JSON: ' + events[0].created_at);
 });
 ```
+Ofcourse, you don't have to use environment vars if you don't want to. You can also use Airbud as a wrapper around request, to profit from retries with exponential backoffs.
 
-Airbud contains some more tricks, such as `expectedKey` and `expectedStatus`, to make it error out when you get invalid data, without you writing all extra `if` and maybes.
+Some other tricks that Airbud contains are `expectedKey` and `expectedStatus`, to make it error out when you get invalid data, without you writing all extra `if` and maybes.
 
 ## Install
 
