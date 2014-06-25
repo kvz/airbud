@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+  - "0.10"
+script: make test REPORTER=spec
+
+# travis encrypt [subdomain]:[api token]@[room id]
+# notifications:
+#   email: false
+#   campfire:
+#     rooms:
+#       secure: xyz
+#     on_failure: always
+#     on_success: always
