@@ -4,17 +4,19 @@ retry   = require "retry"
 
 class Airbud
   @_defaults:
+    # The URL to fetch
+    url: null
+    # How many times to try
+    retries: 0
+    # Timeout in milliseconds per try
+    timeout: null
     # Automatically parse json
     parseJson: true
-    # How many times to try
-    retries  : 0
-    # Timeout in milliseconds per try
-    timeout  : null
-    # Only used to test the timeout mechanism
-    testDelay: 0
     # A key to find in the rootlevel of the parsed json.
     # If not found, Airbud will error out
     expectedKey: null
+    # Only used by Airbud's own testsuite to test the timeout mechanism
+    testDelay: 0
 
   @fetch: (options, cb) ->
     for key, val of @_defaults

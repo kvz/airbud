@@ -18,8 +18,8 @@ Using [environment variables](https://npmjs.org/package/environmental), your tes
 Now just let `Airbud.fetch` the `options.url`: `process.env.GITHUB_ENDPOINT`, and it will either serve the fixture, or the real thing, depending which environment you are in. This makes it easy to test your app's event parsing capabilities, without having to worry about Github ratelimiting, downtime, or sloth when running your tests:
 
 ```javascript
-Airbud = require("airbud");
-opts   = {
+var Airbud = require("airbud");
+var opts   = {
   url    : process.env.GITHUB_ENDPOINT,
   retries: 3
 };
@@ -33,7 +33,7 @@ Airbud.fetch (opts, function (err, events, info) {
   console.log(info.attempts);
   // Time it took to complete all attempts
   console.log(info.totalDuration);
-  // events json is parsed by default
+  // JSON is parsed by default
   console.log(events[0].created_at);
 });
 ```
@@ -51,17 +51,22 @@ npm install --save airbud
 Here are all of Airbud's options and their default values
 
 ```coffeescript
-# Automatically parse json
-parseJson: true
+# The URL to fetch
+url: null
 # How many times to try
 retries: 0
 # Timeout in milliseconds per try
 timeout: null
-# Only used to test the timeout mechanism
-testDelay: 0
+# Automatically parse JSON
+parseJson: true
 # A key to find in the rootlevel of the parsed json.
 # If not found, Airbud will error out
 expectedKey: null
+# An array of allowed HTTP Status codes. If specified,
+# Airbud will error out if the actual status doesn't match
+expectedStatus: null
+# Only used by Airbud's own testsuite to test the timeout mechanism
+testDelay: 0
 ```
 
 ## Contributing
