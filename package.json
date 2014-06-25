@@ -1,6 +1,6 @@
 {
   "name": "airbud",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The golden receiver. A node module for making http request, with boilerplate for handling json, retries & injecting fixtures",
   "keywords": [
     "http",
