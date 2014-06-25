@@ -48,6 +48,6 @@ describe "endpoint", ->
       Airbud.fetch opts, (err, data, info) ->
         err.should.have.property("message").that.match /Operation timeout of \d+ms reached/
         info.should.have.property("attempts").that.equals 2
-        info.should.have.property("totalDuration").that.is.within 97, 103
+        info.should.have.property("totalDuration").that.is.within 80, 120
         #         should be 100. but allow for timer inaccuracy --^
         done()
