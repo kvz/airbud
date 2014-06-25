@@ -27,7 +27,7 @@ var opts   = {
   url: process.env.GITHUB_EVENTS_ENDPOINT,
 };
 
-Airbud.fetch (opts, function (err, events, info) {
+Airbud.fetch(opts, function (err, events, info) {
   if (err) {
     throw err;
   }
@@ -45,7 +45,6 @@ Airbud = require "airbud"
 opts   =
   retries: 3
   url    : "https://api.github.com/events"
-};
 
 Airbud.fetch opts, (err, events, info) ->
   if err
@@ -87,19 +86,19 @@ expectedStatus: null
 testDelay: 0
 ```
 
-## Contributing
+## Contribute
 
 I'd be happy to accept pull requests. If you plan on working on something big, please first give a shout!
 
-### Compiling
+### Compile
 
 This project is written in [CoffeeScript](http://coffeescript.org/), but the JavaScript it generates is commited back into the repository so people can use this module without a CoffeeScript dependency. If you want to work on the source, please do so in `./src` and type: `make build` or `make test` (also builds first). Please don't edit generated JavaScript in `./lib`!
 
-### Testing
+### Test
 
 Check your sources for linting errors via `make lint`, and unit tests via `make test`.
 
-### Releasing
+### Release
 
 Releasing a new version to npmjs.org can be done via `make release-major` (or minor / patch, depending on the [semantic versioning](http://semver.org/) impact of your changes). This:
 
