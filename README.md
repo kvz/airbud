@@ -54,9 +54,9 @@ Here are all of Airbud's options and their default values
 # Automatically parse json
 parseJson: true
 # How many times to try
-retries  : 0
+retries: 0
 # Timeout in milliseconds per try
-timeout  : null
+timeout: null
 # Only used to test the timeout mechanism
 testDelay: 0
 # A key to find in the rootlevel of the parsed json.
