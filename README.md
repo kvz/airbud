@@ -13,9 +13,13 @@ Airbud is a wrapper around [request](https://www.npmjs.org/package/request) with
 
 ## Example
 
-Using [environment variables](https://npmjs.org/package/environmental), your test environment can have `GITHUB_ENDPOINT` of `"./fixtures/github-events.json"`, while in production, it's `"https://api.github.com/events"`.
+Say you're writing an app that among things, retrieves public events from the GitHub API.
 
-Now just let `Airbud.fetch` the `options.url`: `process.env.GITHUB_ENDPOINT`, and it will either serve the fixture, or the real thing, depending which environment you are in. This makes it easy to test your app's event parsing capabilities, without having to worry about Github ratelimiting, downtime, or sloth when running your tests:
+Using [environment variables](https://npmjs.org/package/environmental), your production environment will have a `GITHUB_ENDPOINT` of `"https://api.github.com/events"`, but when you `source envs/test.sh`, it can be `"file://./fixtures/github-events.json"`.
+
+Now just let `Airbud.fetch` the `process.env.GITHUB_ENDPOINT`, and it will either retrieve the fixture, or the real thing, depending which environment you are in.
+
+This makes it easy to test your app's depending functions, without having to worry about GitHub ratelimiting, downtime, or sloth when running your tests. All of this while without making your app aware or changing it's flow.
 
 ```javascript
 var Airbud = require("airbud");
@@ -29,14 +33,13 @@ Airbud.fetch (opts, function (err, events, info) {
     throw err;
   }
 
-  // Number of attempts
-  console.log(info.attempts);
-  // Time it took to complete all attempts
-  console.log(info.totalDuration);
-  // JSON is parsed by default
-  console.log(events[0].created_at);
+  console.log('Number of attempts: '+ info.attempts);
+  console.log('Time it took to complete all attempts:' + info.totalDuration);
+  console.log('Some auto-parsed JSON: ' + events[0].created_at);
 });
 ```
+
+Airbud contains some more tricks, such as `expectedKey` and `expectedStatus`, to make it error out when you get invalid data, without you writing all extra `if` and maybes.
 
 ## Install
 
@@ -48,7 +51,7 @@ npm install --save airbud
 
 ## Options
 
-Here are all of Airbud's options and their default values
+Here are all of Airbud's options and their default values.
 
 ```coffeescript
 # The URL to fetch
@@ -73,7 +76,7 @@ testDelay: 0
 
 I'd be happy to accept pull requests. If you plan on working on something big, please first give a shout!
 
-### Building
+### Compiling
 
 This project is written in [CoffeeScript](http://coffeescript.org/), but the JavaScript it generates is commited back into the repository so people can use this module without a CoffeeScript dependency. If you want to work on the source, please do so in `./src` and type: `make build` or `make test` (also builds first). Please don't edit generated JavaScript in `./lib`!
 
@@ -83,12 +86,12 @@ Check your sources for linting errors via `make lint`, and unit tests via `make 
 
 ### Releasing
 
-Releasing a new version to npmjs.org can be done via `make release-major` (or minor / patch, depending on the [semantic versioning](http://semver.org/) impact of your changes). This will
+Releasing a new version to npmjs.org can be done via `make release-major` (or minor / patch, depending on the [semantic versioning](http://semver.org/) impact of your changes). This:
 
- - update the `package.json`
- - save a release commit with the updated version in Git
- - push to Github
- - publish to npmjs.org
+ - updates the `package.json`
+ - saves a release commit with the updated version in Git
+ - pushes to GitHub
+ - publishes to npmjs.org
 
 ## Authors
 
