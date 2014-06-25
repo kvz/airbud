@@ -34,7 +34,7 @@ Airbud.fetch (opts, function (err, events, info) {
   }
 
   console.log('Number of attempts: '+ info.attempts);
-  console.log('Time it took to complete all attempts:' + info.totalDuration);
+  console.log('Time it took to complete all attempts: ' + info.totalDuration);
   console.log('Some auto-parsed JSON: ' + events[0].created_at);
 });
 ```
