@@ -13,7 +13,7 @@ describe "endpoint", ->
         url: "file://#{fixtureDir}/root.json"
       Airbud.fetch opts, (err, data, info) ->
         expect(err).to.be.null
-        info.should.have.property('attempts').that.equals 1
+        info.should.have.property("attempts").that.equals 1
         done()
 
     it "should fail on not having a desired key in body", (done) ->
@@ -33,9 +33,9 @@ describe "endpoint", ->
         retries   : 1
 
       Airbud.fetch opts, (err, data, info) ->
-        info.should.have.property('attempts').that.equals 2
-        info.should.have.property('totalDuration').that.is.within opts.minTimeout, opts.maxTimeout
-        err.should.have.property('message').that.match /Error while opening/
+        info.should.have.property("attempts").that.equals 2
+        info.should.have.property("totalDuration").that.is.within opts.minTimeout, opts.maxTimeout
+        err.should.have.property("message").that.match /Error while opening/
         done()
 
     it "should retry and fail on long execution", (done) ->
@@ -46,8 +46,8 @@ describe "endpoint", ->
         retries  : 1
 
       Airbud.fetch opts, (err, data, info) ->
-        err.should.have.property('message').that.match /Operation timeout of \d+ms reached/
-        info.should.have.property('attempts').that.equals 2
-        info.should.have.property('totalDuration').that.is.within 97, 103
+        err.should.have.property("message").that.match /Operation timeout of \d+ms reached/
+        info.should.have.property("attempts").that.equals 2
+        info.should.have.property("totalDuration").that.is.within 97, 103
         #         should be 100. but allow for timer inaccuracy --^
         done()
