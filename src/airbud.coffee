@@ -6,25 +6,31 @@ class Airbud
   @_defaults:
     # The URL to fetch
     url: null
+
     # How many times to try
     retries: 0
+
     # Timeout in milliseconds per try
     timeout: null
+
     # Automatically parse json
     parseJson: true
+
     # A key to find in the rootlevel of the parsed json.
     # If not found, Airbud will error out
     expectedKey: null
+
     # Only used by Airbud's own testsuite to test the timeout mechanism
     testDelay: 0
 
   @fetch: (options, cb) ->
+    if !options.url
+      err = new Error "You did not specify a url to fetch"
+      return cb err
+
     for key, val of @_defaults
       if !options[key]?
         options[key] = val
-
-    if !options.url
-      return cb new Error "You did not specify a url to fetch"
 
     operation = retry.operation options
 
@@ -34,7 +40,9 @@ class Airbud
       timeoutForOperation =
         timeout: options.timeout
         cb: ->
-          return operation.retry(new Error "Operation timeout of #{options.timeout}ms reached. ")
+          msg = "Operation timeout of #{options.timeout}ms reached."
+          err = new Error msg
+          return operation.retry err
 
     totalStart         = +new Date
     operationDurations = 0
@@ -61,8 +69,9 @@ class Airbud
       setTimeout =>
         fs.readFile path, "utf8", (err, buf) =>
           if err
-            return cb new Error "Error while opening #{path}. #{err.message}"
-          return @handleData options, buf, cb
+            returnErr = new Error "Error while opening #{path}. #{err.message}"
+            return cb returnErr
+          return @_handleData options, buf, cb
       , options.testDelay
       return
 
@@ -72,28 +81,29 @@ class Airbud
 
       if options.expectedStatus?
         if options.expectedStatus.indexOf(parseInt(res.statusCode, 10)) == -1
-          return cb new Error(
-            "#{res.statusCode} received when fetching '#{url}'. \n" +
-            "expected one status of: #{options.expectedStatus.join(', ')}. #{buf} "
-          )
+          msg = "#{res.statusCode} received when fetching '#{url}'. \n expected"
+          msg += " one status of: #{options.expectedStatus.join(', ')}. #{buf}"
+          err = new Error msg
+          return cb err
 
-      return @handleData options, buf, cb
+      return @_handleData options, buf, cb
 
-  @handleData: (options, buf, cb) ->
+  @_handleData: (options, buf, cb) ->
     data = buf
 
-    if options.parseJson
-      try
-        data = JSON.parse data
-      catch e
-        return cb e, data
+    if !options.parseJson
+      return cb null, data
 
-      if options.expectedKey?
-        if !data[options.expectedKey]?
-          return cb new Error(
-            "Invalid body received when fetching '#{options.url}'. \n" +
-            "No key: #{options.expectedKey}. #{buf}"
-          )
+    try
+      data = JSON.parse data
+    catch e
+      return cb e, data
+
+    if options.expectedKey? && !data[options.expectedKey]?
+      msg = "Invalid body received when fetching '#{options.url}'. \n"
+      msg += "No key: #{options.expectedKey}. #{buf}"
+      err = new Error msg
+      return cb err
 
     cb null, data
 
