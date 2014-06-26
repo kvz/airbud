@@ -3,9 +3,18 @@ fs      = require "fs"
 retry   = require "retry"
 
 class Airbud
-  @fetch: (options, cb) ->
+  @retrieve: (options, cb) ->
+    if typeof options == "string"
+      options = url: options
     airbud = new AirbudInstance(options)
-    return airbud.fetch cb
+    return airbud.retrieve cb
+
+  @json: (options, cb) ->
+    if typeof options == "string"
+      options = url: options
+    options.parseJson = true
+    airbud = new AirbudInstance(options)
+    return airbud.retrieve cb
 
 class AirbudInstance
   constructor: ({
@@ -20,7 +29,7 @@ class AirbudInstance
     @expectedKey,
     @expectedStatus,
   } = {}) ->
-    # The URL to fetch
+    # The URL to retrieve
     @url ?= null
 
     # Timeout of a single operation
@@ -42,7 +51,7 @@ class AirbudInstance
     @randomize ?= false
 
     # Automatically parse json
-    @parseJson ?= true
+    @parseJson ?= null
 
     # A key to find in the rootlevel of the parsed json.
     # If not found, Airbud will error out
@@ -54,7 +63,7 @@ class AirbudInstance
 
     # Validate
     if !@url
-      err = new Error "You did not specify a url to fetch"
+      err = new Error "You did not specify a url to retrieve"
       return cb err
 
     # Normalize expectedStatus as we allow these input formats:
@@ -71,7 +80,7 @@ class AirbudInstance
         .replace /x/g, "\\d"
       @expectedStatus = new RegExp "^#{@expectedStatus}$"
 
-  fetch: (cb) ->
+  retrieve: (cb) ->
     operation = retry.operation
       retries   : @retries
       factor    : @factor

@@ -8,14 +8,35 @@ port       = 7000
 
 describe "airbud", ->
   @timeout 10000 # <-- This is the Mocha timeout, allowing tests to run longer
-  describe "fetch", ->
+  describe "retrieve", ->
+    it "should not try to parse JSON by default", (done) ->
+      opts =
+        url             : fakeserver.createServer(port: ++port)
+      Airbud.retrieve opts, (err, data, info) ->
+        expect(err).to.be.null
+        data.should.equal "{ \"msg\": \"OK\" }"
+        info.should.have.property("statusCode").that.equals 202
+        info.should.have.property("attempts").that.equals 1
+        done()
+
+  describe "json", ->
+    it "should be able to take a plain url as options argument", (done) ->
+      url = fakeserver.createServer(port: ++port)
+      Airbud.json url, (err, data, info) ->
+        expect(err).to.be.null
+        data.should.have.property("msg").that.equals "OK"
+        info.should.have.property("statusCode").that.equals 202
+        info.should.have.property("attempts").that.equals 1
+        done()
+
+  describe "json", ->
     it "should (re)try 500 HTTP Status 3 times by default", (done) ->
       opts =
         url             : fakeserver.createServer(port: ++port, numberOfFails: 99)
         operationTimeout: 10
         minInterval     : 1
         maxInterval     : 1
-      Airbud.fetch opts, (err, data, info) ->
+      Airbud.json opts, (err, data, info) ->
         err.should.have.property("message").that.match /500/
         info.should.have.property("statusCode").that.equals 500
         info.should.have.property("attempts").that.equals 3
@@ -28,7 +49,7 @@ describe "airbud", ->
         minInterval   : 1
         maxInterval   : 1
         expectedStatus: [ "xxx" ]
-      Airbud.fetch opts, (err, data, info) ->
+      Airbud.json opts, (err, data, info) ->
         expect(err).to.be.null
         info.should.have.property("statusCode").that.equals 500
         info.should.have.property("attempts").that.equals 1
@@ -42,7 +63,7 @@ describe "airbud", ->
         minInterval   : 1
         maxInterval   : 1
         expectedStatus: [ "20x", "30x" ]
-      Airbud.fetch opts, (err, data, info) ->
+      Airbud.json opts, (err, data, info) ->
         expect(err).to.be.null
         info.should.have.property("attempts").that.equals 4
         data.should.have.property("msg").that.equals "OK"
@@ -52,7 +73,7 @@ describe "airbud", ->
       opts =
         url             : fakeserver.createServer(port: ++port, redirect: {1: true})
         expectedStatus  : 200
-      Airbud.fetch opts, (err, data, info) ->
+      Airbud.json opts, (err, data, info) ->
         expect(err).to.be.null
         info.should.have.property("attempts").that.equals 1
         data.should.have.property("msg").that.equals "Arrived at other location"
@@ -65,7 +86,7 @@ describe "airbud", ->
         operationTimeout: 500
         minInterval     : 1
         maxInterval     : 1
-      Airbud.fetch opts, (err, data, info) ->
+      Airbud.json opts, (err, data, info) ->
         expect(err).to.be.null
         info.should.have.property("attempts").that.equals 2
         data.should.have.property("msg").that.equals "OK"
@@ -76,7 +97,7 @@ describe "airbud", ->
     it "should be able to serve a local fixture", (done) ->
       opts =
         url: "file://#{fixtureDir}/root.json"
-      Airbud.fetch opts, (err, data, info) ->
+      Airbud.json opts, (err, data, info) ->
         expect(err).to.be.null
         info.should.have.property("attempts").that.equals 1
         done()
@@ -89,7 +110,7 @@ describe "airbud", ->
         retries    : 1
         expectedKey: "this-key-wont-exist"
 
-      Airbud.fetch opts, (err, data, info) ->
+      Airbud.json opts, (err, data, info) ->
         info.should.have.property("attempts").that.equals 2
         expect(err).to.match /No key: this-key-wont-exist/
         done()
@@ -101,7 +122,7 @@ describe "airbud", ->
         maxInterval: 1
         retries    : 1
 
-      Airbud.fetch opts, (err, data, info) ->
+      Airbud.json opts, (err, data, info) ->
         info.should.have.property("attempts").that.equals 2
         err.should.have.property("message").that.match /Error while opening/
         done()

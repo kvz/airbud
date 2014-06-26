@@ -11,23 +11,68 @@
 
 Airbud is a wrapper around [request](https://www.npmjs.org/package/request) with support for for handling JSON, retries with exponential backoff &amp; injecting fixtures. This will save you some boilerplate and allow you to easier test your applications.
 
-## Example
+## Install
+
+Inside your project, type
+
+```bash
+npm install --save airbud
+```
+
+## Use
+
+To use Airbud, first require it
+
+In JavaScript
+
+```
+var Airbud = require('airbud');
+```
+
+Or CoffeeScript:
+
+```coffeescript
+Airbud = require "airbud"
+```
+
+Airbud doesn't care.
+
+### Example: simple
+
+A common usecase is getting remote JSON. By default `Airbud.json` will already:
+
+  - Timeout each single operation in 30 seconds
+  - Do 2 additional tries with exponential back-off
+  - Return parsed JSON
+  - Return `err` if
+    - A non-2xx HTTP code is returned (3xx redirects are followed first)
+    - The json could not be parsed
+
+In CoffeeScript:
+
+```coffeescript
+Airbud.json "https://api.github.com/events", (err, events, info) ->
+  if err
+    throw err
+  console.log events[0].created_at
+```
+
+### Example: local JSON fixtures
 
 Say you're writing an app that among things, retrieves public events from the GitHub API.
 
 Using [environment variables](https://github.com/kvz/environmental), your production environment will have a `GITHUB_EVENTS_ENDPOINT` of `"https://api.github.com/events"`, but when you `source envs/test.sh`, it can be `"file://./fixtures/github-events.json"`.
 
-Now just let `Airbud.fetch` the `process.env.GITHUB_EVENTS_ENDPOINT`, and it will either retrieve the fixture, or the real thing, depending which environment you are in.
+Now just let `Airbud.retrieve` the `process.env.GITHUB_EVENTS_ENDPOINT`, and it will either retrieve the fixture, or the real thing, depending which environment you are in.
 
-This makes it easy to test your app's depending functions, without having to worry about GitHub ratelimiting, downtime, or sloth when running your tests. All of this without making your app aware, or changing it's flow.
+This makes it easy to test your app's depending functions, without having to worry about GitHub ratelimiting, downtime, or sloth when running your tests. All of this without making your app aware, or changing it's flow. In JavaScript:
 
 ```javascript
-var Airbud = require("airbud");
 var opts   = {
   url: process.env.GITHUB_EVENTS_ENDPOINT,
 };
 
-Airbud.fetch(opts, function (err, events, info) {
+Airbud.json(opts, function (err, events, info) {
   if (err) {
     throw err;
   }
@@ -38,15 +83,23 @@ Airbud.fetch(opts, function (err, events, info) {
 });
 ```
 
-Ofcourse, you don't have to use environment vars if you don't want to. You can also use Airbud as a wrapper around request to profit from retries with exponential backoffs. In CoffeeScript:
+### Example: customize
+
+You don't have to use environment vars or the local fixture feature. You can also use Airbud as a wrapper around request to profit from retries with exponential backoffs. Here's how to customize the retry flow in CoffeeScript:
 
 ```coffeescript
-Airbud = require "airbud"
-opts   =
-  retries: 3
-  url    : "https://api.github.com/events"
+opts =
+  retries         : 3
+  randomize       : true
+  factor          : 3
+  minInterval     : 3  * 1000
+  maxInterval     : 30 * 1000
+  operationTimeout: 10 * 1000
+  expectedStatus  : /^[2345]\d{2}$/
+  expectedKey     : "status"
+  url             : "https://api.github.com/events"
 
-Airbud.fetch opts, (err, events, info) ->
+Airbud.retrieve opts, (err, events, info) ->
   if err
     throw err
 
@@ -55,49 +108,32 @@ Airbud.fetch opts, (err, events, info) ->
 
 Some other tricks up Airbud's sleeves are `expectedKey` and `expectedStatus`, to make it error out when you get invalid data, without you writing all the extra `if` and maybes.
 
-## Install
-
-Inside your project, type
-
-```bash
-npm install --save airbud
-```
 
 ## Options
 
 Here are all of Airbud's options and their default values.
 
-### `url`
-The URL to fetch. Default is `null`
+`url` - The URL to retrieve. Default is `null`
 
-### `operationTimeout`
-Timeout of a single operation in milliseconds. Default is `30000`
+`operationTimeout` - Timeout of a single operation in milliseconds. Default is `30000`
 
-### `retries`
-The maximum amount of times to retry the operation. Default is `2`
+`retries` - The maximum amount of times to retry the operation. Default is `2`
 
-### `factor`
-The exponential factor to use. Default is `2`
+`factor` - The exponential factor to use. Default is `2`
 
-### `minInterval`
-The number of milliseconds before starting the first retry. Default is `3000`
+`minInterval` - The number of milliseconds before starting the first retry. Default is `3000`
 
-### `maxInterval`
-The maximum number of milliseconds between two retries. Default is `Infinity`
+`maxInterval` - The maximum number of milliseconds between two retries. Default is `Infinity`
 
-### `randomize`
-Randomizes the intervals by multiplying with a factor between 1 to 2. Default is `false`
+`randomize` - Randomizes the intervals by multiplying with a factor between 1 to 2. Default is `false`
 
-### `parseJson`
-Automatically parse JSON. Default is `true`
+`parseJson` - Automatically parse JSON. Default is `null`, but default is `true` for `Airbud.json()`
 
-### `expectedKey`
-A key to find in the rootlevel of the parsed JSON. If not found, Airbud will error out. Default is `null`
+`expectedKey` - A key to find in the rootlevel of the parsed JSON. If not found, Airbud will error out. Default is `null`
 
-### `expectedStatus`
-An array of allowed HTTP Status codes. If specified,. Airbud will error out if the actual status doesn't match. Default is `"20x"`
+`expectedStatus` - An array of allowed HTTP Status codes. If specified,. Airbud will error out if the actual status doesn't match. Default is `"20x"`
 
-30x redirect codes are followed automatically
+30x redirect codes are followed automatically.
 
 ## Contribute
 
