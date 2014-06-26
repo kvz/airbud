@@ -13,7 +13,7 @@ build:
 	$(COFFEE) $(CSOPTS) -c -o lib src/airbud.coffee
 
 test: build
-	$(MOCHA) --reporter $(REPORTER) test/
+	$(MOCHA) --reporter $(REPORTER) test/ --grep "$(GREP)"
 
 compile:
 	@echo "Compiling files"

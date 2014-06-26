@@ -3,44 +3,89 @@ fs      = require "fs"
 retry   = require "retry"
 
 class Airbud
-  @_defaults:
+  @fetch: (options, cb) ->
+    airbud = new AirbudInstance(options)
+    return airbud.fetch cb
+
+class AirbudInstance
+  constructor: ({
+    @url,
+    @operationTimeout,
+    @retries,
+    @factor,
+    @minInterval,
+    @maxInterval,
+    @randomize,
+    @parseJson,
+    @expectedKey,
+    @expectedStatus,
+  } = {}) ->
     # The URL to fetch
-    url: null
+    @url ?= null
 
-    # How many times to try
-    retries: 0
+    # Timeout of a single operation
+    @operationTimeout ?= 30000
 
-    # Timeout in milliseconds per try
-    timeout: null
+    # The maximum amount of times to retry the operation
+    @retries ?= 2
+
+    # The exponential factor to use
+    @factor ?= 2
+
+    # The number of milliseconds before starting the first retry
+    @minInterval ?= 3000
+
+    # The maximum number of milliseconds between two retries
+    @maxInterval ?= Infinity
+
+    # Randomizes the intervals by multiplying with a factor between 1 to 2
+    @randomize ?= false
 
     # Automatically parse json
-    parseJson: true
+    @parseJson ?= true
 
     # A key to find in the rootlevel of the parsed json.
     # If not found, Airbud will error out
-    expectedKey: null
+    @expectedKey ?= null
 
-    # Only used by Airbud's own testsuite to test the timeout mechanism
-    testDelay: 0
+    # An array of allowed HTTP Status codes. If specified,
+    # Airbud will error out if the actual status doesn't match
+    @expectedStatus ?= "20x"
 
-  @fetch: (options, cb) ->
-    if !options.url
+    # Validate
+    if !@url
       err = new Error "You did not specify a url to fetch"
       return cb err
 
-    for key, val of @_defaults
-      if !options[key]?
-        options[key] = val
+    # Normalize expectedStatus as we allow these input formats:
+    #  - RegExp
+    #  - 200
+    #  - "20x"
+    #  - [ "20x", "40x" ]
+    #  - "xxx"
+    if @expectedStatus? and @expectedStatus not instanceof RegExp
+      if @expectedStatus not instanceof Array
+        @expectedStatus = [ @expectedStatus ]
+      @expectedStatus = @expectedStatus
+        .join("|")
+        .replace /x/g, "\\d"
+      @expectedStatus = new RegExp "^#{@expectedStatus}$"
 
-    operation = retry.operation options
+  fetch: (cb) ->
+    operation = retry.operation
+      retries   : @retries
+      factor    : @factor
+      minTimeout: @minInterval
+      maxTimeout: @maxInterval
+      randomize : @randomize
 
     # Setup timeouts for single operation
-    timeoutForOperation = null
-    if options.timeout?
-      timeoutForOperation =
-        timeout: options.timeout
+    cbOperationTimeout = null
+    if @operationTimeout?
+      cbOperationTimeout =
+        timeout: @operationTimeout
         cb: ->
-          msg = "Operation timeout of #{options.timeout}ms reached."
+          msg = "Operation timeout of #{@operationTimeout}ms reached."
           err = new Error msg
           return operation.retry err
 
@@ -48,63 +93,63 @@ class Airbud
     operationDurations = 0
     operation.attempt (currentAttempt) =>
       operationStart = +new Date
-      @_fetch options, (err, data) ->
+      @_execute (err, data, res) ->
         operationDurations += +new Date - operationStart
         if operation.retry(err)
           return
 
         totalDuration = +new Date - totalStart
         info          =
+          statusCode       : res?.statusCode
           errors           : operation.errors()
           attempts         : operation.attempts()
           totalDuration    : totalDuration
           operationDuration: operationDurations / operation.attempts()
-        cb operation.mainError(), data, info
-    , timeoutForOperation
+        returnErr = if err then operation.mainError() else null
+        cb returnErr, data, info
+    , cbOperationTimeout
 
-  @_fetch: (options, cb) ->
-    if options.url.indexOf("file://") == 0
+  _execute: (cb) ->
+    if @url.indexOf("file://") == 0
       # Url can also be local json to inject test fixtures
-      path = options.url.substr(7, options.url.length).split("?")[0]
-      setTimeout =>
-        fs.readFile path, "utf8", (err, buf) =>
-          if err
-            returnErr = new Error "Error while opening #{path}. #{err.message}"
-            return cb returnErr
-          return @_handleData options, buf, cb
-      , options.testDelay
+      path = @url.substr(7, @url.length).split("?")[0]
+      fs.readFile path, "utf8", (err, buf) =>
+        if err
+          returnErr = new Error "Error while opening #{path}. #{err.message}"
+          return cb returnErr
+        return @_handleData buf, {}, cb
       return
 
-    request.get options.url, (err, res, buf) =>
+    request.get @url, (err, res, buf) =>
       if err
-        return cb err, buf
+        return cb err, buf, res
 
-      if options.expectedStatus?
-        if options.expectedStatus.indexOf(parseInt(res.statusCode, 10)) == -1
-          msg = "#{res.statusCode} received when fetching '#{url}'. \n expected"
-          msg += " one status of: #{options.expectedStatus.join(', ')}. #{buf}"
-          err = new Error msg
-          return cb err
+      if @expectedStatus?
+        if not @expectedStatus.test(res.statusCode + "")
+          msg  = "HTTP Status #{res.statusCode} received when fetching '#{@url}'. "
+          msg += "Expected: #{@expectedStatus}. #{(buf + "").substr(0, 30)}.."
+          err  = new Error msg
+          return cb err, buf, res
 
-      return @_handleData options, buf, cb
+      return @_handleData buf, res, cb
 
-  @_handleData: (options, buf, cb) ->
+  _handleData: (buf, res, cb) ->
     data = buf
 
-    if !options.parseJson
-      return cb null, data
+    if !@parseJson
+      return cb null, data, res
 
     try
       data = JSON.parse data
     catch e
-      return cb e, data
+      return cb e, data, res
 
-    if options.expectedKey? && !data[options.expectedKey]?
-      msg = "Invalid body received when fetching '#{options.url}'. \n"
-      msg += "No key: #{options.expectedKey}. #{buf}"
-      err = new Error msg
-      return cb err
+    if @expectedKey? && !data[@expectedKey]?
+      msg  = "Invalid body received when fetching '#{@url}'. \n"
+      msg += "No key: #{@expectedKey}. #{buf}"
+      err  = new Error msg
+      return cb err, data, res
 
-    cb null, data
+    cb null, data, res
 
 module.exports = Airbud

@@ -67,24 +67,37 @@ npm install --save airbud
 
 Here are all of Airbud's options and their default values.
 
-```coffeescript
-# The URL to fetch
-url: null
-# How many times to try
-retries: 0
-# Timeout in milliseconds per try
-timeout: null
-# Automatically parse JSON
-parseJson: true
-# A key to find in the rootlevel of the parsed json.
-# If not found, Airbud will error out
-expectedKey: null
-# An array of allowed HTTP Status codes. If specified,
-# Airbud will error out if the actual status doesn't match
-expectedStatus: null
-# Only used by Airbud's own testsuite to test the timeout mechanism
-testDelay: 0
-```
+### `url`
+The URL to fetch. Default is `null`
+
+### `operationTimeout`
+Timeout of a single operation in milliseconds. Default is `30000`
+
+### `retries`
+The maximum amount of times to retry the operation. Default is `2`
+
+### `factor`
+The exponential factor to use. Default is `2`
+
+### `minInterval`
+The number of milliseconds before starting the first retry. Default is `3000`
+
+### `maxInterval`
+The maximum number of milliseconds between two retries. Default is `Infinity`
+
+### `randomize`
+Randomizes the intervals by multiplying with a factor between 1 to 2. Default is `false`
+
+### `parseJson`
+Automatically parse JSON. Default is `true`
+
+### `expectedKey`
+A key to find in the rootlevel of the parsed JSON. If not found, Airbud will error out. Default is `null`
+
+### `expectedStatus`
+An array of allowed HTTP Status codes. If specified,. Airbud will error out if the actual status doesn't match. Default is `"20x"`
+
+30x redirect codes are followed automatically
 
 ## Contribute
 
@@ -97,6 +110,8 @@ This project is written in [CoffeeScript](http://coffeescript.org/), but the Jav
 ### Test
 
 Check your sources for linting errors via `make lint`, and unit tests via `make test`.
+
+To single out a test use `make test GREP=30x`
 
 ### Release
 
