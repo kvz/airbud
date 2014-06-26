@@ -145,7 +145,7 @@ This project is written in [CoffeeScript](http://coffeescript.org/), but the Jav
 
 ### Test
 
-Check your sources for linting errors via `make lint`, and unit tests via `make test`.
+Run tests via `make test`.
 
 To single out a test use `make test GREP=30x`
 
