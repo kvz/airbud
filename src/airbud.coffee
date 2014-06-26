@@ -19,12 +19,13 @@ class Airbud
     testDelay: 0
 
   @fetch: (options, cb) ->
+    if !options.url
+      err = new Error "You did not specify a url to fetch"
+      return cb err
+
     for key, val of @_defaults
       if !options[key]?
         options[key] = val
-
-    if !options.url
-      return cb new Error "You did not specify a url to fetch"
 
     operation = retry.operation options
 
