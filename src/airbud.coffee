@@ -40,7 +40,9 @@ class Airbud
       timeoutForOperation =
         timeout: options.timeout
         cb: ->
-          return operation.retry(new Error "Operation timeout of #{options.timeout}ms reached. ")
+          msg = "Operation timeout of #{options.timeout}ms reached."
+          err = new Error msg
+          return operation.retry err
 
     totalStart         = +new Date
     operationDurations = 0
@@ -78,10 +80,10 @@ class Airbud
 
       if options.expectedStatus?
         if options.expectedStatus.indexOf(parseInt(res.statusCode, 10)) == -1
-          return cb new Error(
-            "#{res.statusCode} received when fetching '#{url}'. \n" +
-            "expected one status of: #{options.expectedStatus.join(', ')}. #{buf} "
-          )
+          msg = "#{res.statusCode} received when fetching '#{url}'. \n expected"
+          msg += " one status of: #{options.expectedStatus.join(', ')}. #{buf}"
+          err = new Error err
+          return cb err
 
       return @handleData options, buf, cb
 
