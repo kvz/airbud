@@ -69,8 +69,9 @@ class Airbud
       setTimeout =>
         fs.readFile path, "utf8", (err, buf) =>
           if err
-            return cb new Error "Error while opening #{path}. #{err.message}"
-          return @handleData options, buf, cb
+            returnErr = new Error "Error while opening #{path}. #{err.message}"
+            return cb returnErr
+          return @_handleData options, buf, cb
       , options.testDelay
       return
 
@@ -82,26 +83,27 @@ class Airbud
         if options.expectedStatus.indexOf(parseInt(res.statusCode, 10)) == -1
           msg = "#{res.statusCode} received when fetching '#{url}'. \n expected"
           msg += " one status of: #{options.expectedStatus.join(', ')}. #{buf}"
-          err = new Error err
+          err = new Error msg
           return cb err
 
-      return @handleData options, buf, cb
+      return @_handleData options, buf, cb
 
-  @handleData: (options, buf, cb) ->
+  @_handleData: (options, buf, cb) ->
     data = buf
 
-    if options.parseJson
-      try
-        data = JSON.parse data
-      catch e
-        return cb e, data
+    if !options.parseJson
+      return cb null, data
 
-      if options.expectedKey?
-        if !data[options.expectedKey]?
-          return cb new Error(
-            "Invalid body received when fetching '#{options.url}'. \n" +
-            "No key: #{options.expectedKey}. #{buf}"
-          )
+    try
+      data = JSON.parse data
+    catch e
+      return cb e, data
+
+    if options.expectedKey? && !data[options.expectedKey]?
+      msg = "Invalid body received when fetching '#{options.url}'. \n"
+      msg += "No key: #{options.expectedKey}. #{buf}"
+      err = new Error msg
+      return cb err
 
     cb null, data
 
