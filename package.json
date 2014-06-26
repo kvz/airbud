@@ -1,6 +1,6 @@
 {
   "name": "airbud",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "description": "node.js request wrapper adding support for retries, exponential back-off, fixture serving, JSON",
   "keywords": [
     "http",
