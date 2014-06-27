@@ -30,7 +30,7 @@ describe "airbud", ->
         done()
 
   describe "json", ->
-    it "should (re)try 500 HTTP Status 3 times by default", (done) ->
+    it "should (re)try 500 HTTP Status 5 times by default", (done) ->
       opts =
         url             : fakeserver.createServer(port: ++port, numberOfFails: 99)
         operationTimeout: 10
@@ -39,7 +39,7 @@ describe "airbud", ->
       Airbud.json opts, (err, data, info) ->
         err.should.have.property("message").that.match /500/
         info.should.have.property("statusCode").that.equals 500
-        info.should.have.property("attempts").that.equals 3
+        info.should.have.property("attempts").that.equals 5
         done()
 
     it "should be able to get a 500 HTTP Status without error if we're ambivalent about expectedStatus", (done) ->

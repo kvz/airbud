@@ -35,20 +35,22 @@ class AirbudInstance
     # Timeout of a single operation
     @operationTimeout ?= 30000
 
+    # Retry 5 times over 10 minutes
+    # http://www.wolframalpha.com/input/?i=Sum%5Bx%5Ek+*+5%2C+%7Bk%2C+0%2C+4%7D%5D+%3D+10+*+60+%26%26+x+%3E+0
     # The maximum amount of times to retry the operation
-    @retries ?= 2
+    @retries ?= 4
 
     # The exponential factor to use
-    @factor ?= 2
+    @factor ?= 2.99294
 
     # The number of milliseconds before starting the first retry
-    @minInterval ?= 3000
+    @minInterval ?= 5 * 1000
 
     # The maximum number of milliseconds between two retries
     @maxInterval ?= Infinity
 
     # Randomizes the intervals by multiplying with a factor between 1 to 2
-    @randomize ?= false
+    @randomize ?= true
 
     # Automatically parse json
     @parseJson ?= null

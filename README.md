@@ -7,6 +7,8 @@
 
 # airbud
 
+Retrieving stuff from the web is unreliable. Airbud adds retries for production, and fixture support for test.
+
 ![air_bud_-_golden_receiver](https://cloud.githubusercontent.com/assets/26752/3387034/c4cc56d0-fc79-11e3-8d0a-09ef9280bb0f.jpg)
 
 Airbud is a wrapper around [request](https://www.npmjs.org/package/request) with support for for handling JSON, retries with exponential backoff &amp; injecting fixtures. This will save you some boilerplate and allow you to easier test your applications.
@@ -42,7 +44,7 @@ Airbud doesn't care.
 A common usecase is getting remote JSON. By default `Airbud.json` will already:
 
   - Timeout each single operation in 30 seconds
-  - Do 2 additional tries with exponential back-off
+  - [Retry 5 times over 10 minutes](http://www.wolframalpha.com/input/?i=Sum%5Bx%5Ek+*+5%2C+%7Bk%2C+0%2C+4%7D%5D+%3D+10+*+60+%26%26+x+%3E+0)
   - Return parsed JSON
   - Return `err` if
     - A non-2xx HTTP code is returned (3xx redirects are followed first)
@@ -117,15 +119,15 @@ Here are all of Airbud's options and their default values.
 
 `operationTimeout` - Timeout of a single operation in milliseconds. Default is `30000`
 
-`retries` - The maximum amount of times to retry the operation. Default is `2`
+`retries` - The maximum amount of times to retry the operation. Default is `4`
 
-`factor` - The exponential factor to use. Default is `2`
+`factor` - The exponential factor to use. Default is `2.99294`
 
-`minInterval` - The number of milliseconds before starting the first retry. Default is `3000`
+`minInterval` - The number of milliseconds before starting the first retry. Default is `5000`
 
 `maxInterval` - The maximum number of milliseconds between two retries. Default is `Infinity`
 
-`randomize` - Randomizes the intervals by multiplying with a factor between 1 to 2. Default is `false`
+`randomize` - Randomizes the intervals by multiplying with a factor between 1 to 2. Default is `true`
 
 `parseJson` - Automatically parse JSON. Default is `null`, but default is `true` for `Airbud.json()`
 
