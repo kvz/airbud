@@ -126,3 +126,39 @@ describe "airbud", ->
         info.should.have.property("attempts").that.equals 2
         err.should.have.property("message").that.match /Error while opening/
         done()
+
+    it "should not throw exception for unresolvable domain", (done) ->
+      opts =
+        minInterval: 1
+        maxInterval: 1
+        retries    : 1
+        url        : "http://asd.asdasdasd.asdfsadf.com/non-existing.json"
+
+      Airbud.json opts, (err, data, info) ->
+        info.should.have.property("attempts").that.equals 2
+        err.should.have.property("message").that.match /getaddrinfo ENOTFOUND/
+        done()
+
+    it "should not throw exception for invalid protocol", (done) ->
+      opts =
+        minInterval: 1
+        maxInterval: 1
+        retries    : 1
+        url        : "httpasd://example.com/non-existing.json"
+
+      Airbud.json opts, (err, data, info) ->
+        info.should.have.property("attempts").that.equals 2
+        err.should.have.property("message").that.match /Invalid protocol: httpasd:/
+        done()
+
+    it "should not throw exception for invalid json", (done) ->
+      opts =
+        minInterval: 1
+        maxInterval: 1
+        retries    : 1
+        url        : "file://#{fixtureDir}/invalid.json"
+
+      Airbud.json opts, (err, data, info) ->
+        info.should.have.property("attempts").that.equals 2
+        err.should.have.property("message").that.match /Got an error while parsing json for file:.*\. SyntaxError: Unexpected token i/
+        done()

@@ -6,14 +6,17 @@ class Airbud
   @retrieve: (options, cb) ->
     if typeof options == "string"
       options = url: options
-    airbud = new AirbudInstance(options)
+
+    airbud = new AirbudInstance options
     return airbud.retrieve cb
 
   @json: (options, cb) ->
     if typeof options == "string"
       options = url: options
+
     options.parseJson = true
-    airbud = new AirbudInstance(options)
+
+    airbud = new AirbudInstance options
     return airbud.retrieve cb
 
 class AirbudInstance
@@ -153,6 +156,7 @@ class AirbudInstance
     try
       data = JSON.parse data
     catch e
+      e.message = "Got an error while parsing json for #{@url}. #{e}"
       return cb e, data, res
 
     if @expectedKey? && !data[@expectedKey]?
