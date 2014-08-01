@@ -137,6 +137,23 @@ Here are all of Airbud's options and their default values.
 
 30x redirect codes are followed automatically.
 
+## Info
+
+Besides, `err`, `data`, Airbud returns a third argument `info`. It contains some meta data about the operation(s) for your convenience.
+
+```coffeescript
+# The HTTP status code returned
+statusCode
+# An array of all errors that occured
+errors
+# Number of attempts before Airbud was able to retrieve, or gave up
+attempts
+# Total duration of all attempts
+totalDuration
+# Average duration of a single attempt
+operationDuration
+```
+
 ## Contribute
 
 I'd be happy to accept pull requests. If you plan on working on something big, please first give a shout!
