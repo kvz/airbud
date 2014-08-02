@@ -55,7 +55,7 @@ class Airbud
       airbud = new Airbud options
 
     try
-      airbud.retrieve cb
+      airbud.fetch cb
     catch err
       err.message = "Got an error while retrieving #{airbud.url}. #{err}"
       cb err
@@ -80,11 +80,11 @@ class Airbud
       if @expectedStatus not instanceof Array
         @expectedStatus = [ @expectedStatus ]
       @expectedStatus = @expectedStatus
-        .join("|")
+        .join "|"
         .replace /x/g, "\\d"
       @expectedStatus = new RegExp "^#{@expectedStatus}$"
 
-  retrieve: (mainCb) ->
+  fetch: (mainCb) ->
     operation = retry.operation
       retries   : @retries
       factor    : @factor
@@ -125,7 +125,7 @@ class Airbud
   _execute: (cb) ->
     # Validate
     if !@url
-      err = new Error "You did not specify a url to retrieve"
+      err = new Error "You did not specify a url to fetch"
       return cb err
 
     if @url.indexOf("file://") == 0
