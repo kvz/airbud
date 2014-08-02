@@ -3,7 +3,7 @@ fs      = require "fs"
 retry   = require "retry"
 
 class Airbud
-  @defaults:
+  @_defaults:
     # Timeout of a single operation
     operationTimeout: 30000
 
@@ -36,6 +36,13 @@ class Airbud
     # 30x redirect codes are followed automatically.
     expectedStatus: "20x"
 
+  @getDefaults: ->
+    return Airbud._defaults
+
+  @setDefaults: (options) ->
+    for key, val of options
+      Airbud._defaults[key] = val
+
   @json: (options, cb) ->
     airbud = new Airbud options, parseJson: true
 
@@ -54,7 +61,7 @@ class Airbud
       cb err
 
   constructor: (optionSets...) ->
-    optionSets.unshift Airbud.defaults
+    optionSets.unshift Airbud.getDefaults()
 
     for options in optionSets
       if typeof options == "string"
@@ -90,7 +97,7 @@ class Airbud
     if @operationTimeout?
       cbOperationTimeout =
         timeout: @operationTimeout
-        cb: ->
+        cb     : ->
           msg = "Operation timeout of #{@operationTimeout}ms reached."
           err = new Error msg
           return operation.retry err
@@ -126,9 +133,11 @@ class Airbud
       path = @url.substr(7, @url.length).split("?")[0]
       fs.readFile path, "utf8", (err, buf) =>
         if err
-          returnErr = new Error "Error while opening #{path}. #{err.message}"
+          returnErr = new Error "Cannot open '#{path}'. #{err.message}"
           return cb returnErr
-        return @_handleData buf, {}, cb
+
+        @_handleData buf, {}, cb
+
       return
 
     request.get @url, (err, res, buf) =>
@@ -142,7 +151,7 @@ class Airbud
           err  = new Error msg
           return cb err, buf, res
 
-      return @_handleData buf, res, cb
+      @_handleData buf, res, cb
 
   _handleData: (buf, res, cb) ->
     data = buf

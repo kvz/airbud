@@ -1,17 +1,25 @@
 should     = require("chai").should()
 Fakeserver = require "./fakeserver"
+debug      = require("debug")("Airbud:test-airbud")
+util       = require "util"
 expect     = require("chai").expect
 Airbud     = require "../src/airbud"
 fixtureDir = "#{__dirname}/fixtures"
 fakeserver = new Fakeserver()
 port       = 7000
 
+
+Airbud.setDefaults
+  minInterval: 1
+  maxInterval: 1
+  retries    : 1
+
 describe "airbud", ->
   @timeout 10000 # <-- This is the Mocha timeout, allowing tests to run longer
   describe "retrieve", ->
     it "should not try to parse JSON by default", (done) ->
       opts =
-        url             : fakeserver.createServer(port: ++port)
+        url: fakeserver.createServer(port: ++port)
       Airbud.retrieve opts, (err, data, meta) ->
         expect(err).to.be.null
         data.should.equal "{ \"msg\": \"OK\" }"
@@ -29,13 +37,11 @@ describe "airbud", ->
         meta.should.have.property("attempts").that.equals 1
         done()
 
-  describe "json", ->
-    it "should (re)try 500 HTTP Status 5 times by default", (done) ->
+    it "should (re)try 500 HTTP Status 5 times", (done) ->
       opts =
         url             : fakeserver.createServer(port: ++port, numberOfFails: 99)
+        retries         : 4
         operationTimeout: 10
-        minInterval     : 1
-        maxInterval     : 1
       Airbud.json opts, (err, data, meta) ->
         err.should.have.property("message").that.match /500/
         meta.should.have.property("statusCode").that.equals 500
@@ -46,8 +52,6 @@ describe "airbud", ->
       opts =
         url           : fakeserver.createServer(port: ++port, numberOfFails: 1)
         retries       : 0
-        minInterval   : 1
-        maxInterval   : 1
         expectedStatus: [ "xxx" ]
       Airbud.json opts, (err, data, meta) ->
         expect(err).to.be.null
@@ -60,8 +64,6 @@ describe "airbud", ->
       opts =
         url           : fakeserver.createServer(port: ++port, numberOfFails: 3)
         retries       : 4
-        minInterval   : 1
-        maxInterval   : 1
         expectedStatus: [ "20x", "30x" ]
       Airbud.json opts, (err, data, meta) ->
         expect(err).to.be.null
@@ -84,8 +86,6 @@ describe "airbud", ->
         url             : fakeserver.createServer(port: ++port, delay: {1: 1000})
         retries         : 2
         operationTimeout: 500
-        minInterval     : 1
-        maxInterval     : 1
       Airbud.json opts, (err, data, meta) ->
         expect(err).to.be.null
         meta.should.have.property("attempts").that.equals 2
@@ -105,9 +105,6 @@ describe "airbud", ->
     it "should retry and then fail on not having an expected key in root of local fixture", (done) ->
       opts =
         url        : "file://#{fixtureDir}/root.json"
-        minInterval: 1
-        maxInterval: 1
-        retries    : 1
         expectedKey: "this-key-wont-exist"
 
       Airbud.json opts, (err, data, meta) ->
@@ -117,22 +114,16 @@ describe "airbud", ->
 
     it "should fail on not found, with 2 attempts on missing local fixture", (done) ->
       opts =
-        url        : "file://#{fixtureDir}/non-existing.json"
-        minInterval: 1
-        maxInterval: 1
-        retries    : 1
+        url: "file://#{fixtureDir}/non-existing.json"
 
       Airbud.json opts, (err, data, meta) ->
         meta.should.have.property("attempts").that.equals 2
-        err.should.have.property("message").that.match /Error while opening/
+        err.should.have.property("message").that.match /Cannot open/
         done()
 
     it "should not throw exception for unresolvable domain", (done) ->
       opts =
-        minInterval: 1
-        maxInterval: 1
-        retries    : 1
-        url        : "http://asd.asdasdasd.asdfsadf.com/non-existing.json"
+        url: "http://asd.asdasdasd.asdfsadf.com/non-existing.json"
 
       Airbud.json opts, (err, data, meta) ->
         meta.should.have.property("attempts").that.equals 2
@@ -141,10 +132,7 @@ describe "airbud", ->
 
     it "should not throw exception for invalid protocol", (done) ->
       opts =
-        minInterval: 1
-        maxInterval: 1
-        retries    : 1
-        url        : "httpasd://example.com/non-existing.json"
+        url: "httpasd://example.com/non-existing.json"
 
       Airbud.json opts, (err, data, meta) ->
         meta.should.have.property("attempts").that.equals 2
@@ -153,12 +141,19 @@ describe "airbud", ->
 
     it "should not throw exception for invalid json", (done) ->
       opts =
-        minInterval: 1
-        maxInterval: 1
-        retries    : 1
-        url        : "file://#{fixtureDir}/invalid.json"
+        url: "file://#{fixtureDir}/invalid.json"
 
       Airbud.json opts, (err, data, meta) ->
         meta.should.have.property("attempts").that.equals 2
         err.should.have.property("message").that.match /Got an error while parsing json for file:.*\. SyntaxError: Unexpected token i/
+        done()
+
+
+    it "should be possible to set global defaults", (done) ->
+      Airbud.setDefaults
+        retries: 9
+
+      Airbud.json "httpasd://example.com/non-existing.json", (err, data, meta) ->
+        meta.should.have.property("attempts").that.equals 10
+        err.should.have.property("message").that.match /Invalid protocol: httpasd:/
         done()
