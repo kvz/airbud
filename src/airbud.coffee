@@ -3,13 +3,13 @@ fs      = require "fs"
 retry   = require "retry"
 
 class Airbud
-  # If you want the convenience of using Airbud.json() statically
-  @json: (options, cb) ->
+  # If you want the convenience of using Airbud.newJson() statically
+  @newJson: (options, cb) ->
     airbud = new Airbud options
     airbud.json options, cb
 
-  # If you want the convenience of using Airbud.retrieve() statically
-  @retrieve: (options, cb) ->
+  # If you want the convenience of using Airbud.newRetrieve() statically
+  @newRetrieve: (options, cb) ->
     airbud = new Airbud options
     airbud.retrieve options, cb
 

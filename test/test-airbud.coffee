@@ -168,7 +168,7 @@ describe "airbud", ->
         retries    : 1
         url        : "file://#{fixtureDir}/invalid.json"
 
-      Airbud.json opts, (err, data, meta) ->
+      Airbud.newJson opts, (err, data, meta) ->
         meta.should.have.property("attempts").that.equals 2
         err.should.have.property("message").that.match /Got an error while parsing json for file:.*\. SyntaxError: Unexpected token i/
         done()
