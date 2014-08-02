@@ -10,7 +10,7 @@ lint:
 
 build:
 	make lint || true
-	$(COFFEE) $(CSOPTS) -c -o lib src/airbud.coffee
+	$(COFFEE) $(CSOPTS) -c -o lib src
 
 test: build
 	DEBUG=Airbud:* $(MOCHA) --reporter $(REPORTER) test/ --grep "$(GREP)"
