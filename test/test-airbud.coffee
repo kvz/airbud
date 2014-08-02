@@ -121,6 +121,18 @@ describe "airbud", ->
         err.should.have.property("message").that.match /Cannot open/
         done()
 
+    it "should only fire the callback once, no matter how many attempts", (done) ->
+      opts =
+        retries: 5
+        url    : "file://#{fixtureDir}/non-existing.json"
+
+      cnt = 0
+      Airbud.json opts, (err, data, meta) ->
+        meta.should.have.property("attempts").that.equals 6
+        err.should.have.property("message").that.match /Cannot open/
+        expect(++cnt).to.equal 1
+        done()
+
     it "should not throw exception for unresolvable domain", (done) ->
       opts =
         url: "http://asd.asdasdasd.asdfsadf.com/non-existing.json"

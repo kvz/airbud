@@ -2,7 +2,7 @@ SHELL := /bin/bash
 COFFEE     = node_modules/.bin/coffee
 COFFEELINT = node_modules/.bin/coffeelint
 MOCHA      = node_modules/.bin/mocha --compilers coffee:coffee-script --require "coffee-script/register"
-REPORTER   = nyan
+REPORTER   = spec
 
 lint:
 	@[ ! -f coffeelint.json ] && $(COFFEELINT) --makeconfig > coffeelint.json || true
