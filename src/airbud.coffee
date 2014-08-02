@@ -3,23 +3,16 @@ fs      = require "fs"
 retry   = require "retry"
 
 class Airbud
-  @retrieve: (options, cb) ->
-    if typeof options == "string"
-      options = url: options
-
-    airbud = new AirbudInstance options
-    return airbud.retrieve cb
-
+  # If you want the convenience of using Airbud.json() statically
   @json: (options, cb) ->
-    if typeof options == "string"
-      options = url: options
+    airbud = new Airbud options
+    airbud.json options, cb
 
-    options.parseJson = true
+  # If you want the convenience of using Airbud.retrieve() statically
+  @retrieve: (options, cb) ->
+    airbud = new Airbud options
+    airbud.retrieve options, cb
 
-    airbud = new AirbudInstance options
-    return airbud.retrieve cb
-
-class AirbudInstance
   constructor: ({
     @url,
     @operationTimeout,
@@ -66,10 +59,13 @@ class AirbudInstance
     # Airbud will error out if the actual status doesn't match
     @expectedStatus ?= "20x"
 
-    # Validate
-    if !@url
-      err = new Error "You did not specify a url to retrieve"
-      return cb err
+  _applyOptions: (args...) ->
+    for options in args
+      if typeof options == "string"
+        options = url: options
+
+      for key, val of options
+        this[key] = val
 
     # Normalize expectedStatus as we allow these input formats:
     #  - RegExp
@@ -85,7 +81,13 @@ class AirbudInstance
         .replace /x/g, "\\d"
       @expectedStatus = new RegExp "^#{@expectedStatus}$"
 
-  retrieve: (cb) ->
+  json: (options, cb) ->
+    @_applyOptions options, parseJson: true
+    @retrieve {}, cb
+
+  retrieve: (options, cb) ->
+    @_applyOptions options
+
     operation = retry.operation
       retries   : @retries
       factor    : @factor
@@ -113,14 +115,14 @@ class AirbudInstance
           return
 
         totalDuration = +new Date - totalStart
-        info          =
+        meta          =
           statusCode       : res?.statusCode
           errors           : operation.errors()
           attempts         : operation.attempts()
           totalDuration    : totalDuration
           operationDuration: operationDurations / operation.attempts()
         returnErr = if err then operation.mainError() else null
-        cb returnErr, data, info
+        cb returnErr, data, meta
     , cbOperationTimeout
 
   _execute: (cb) ->

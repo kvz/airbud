@@ -28,20 +28,20 @@ To use Airbud, first require it
 In JavaScript
 
 ```
-var Airbud = require('airbud');
+var airbud = new require('airbud')();
 ```
 
 Or CoffeeScript:
 
 ```coffeescript
-Airbud = require "airbud"
+airbud = new require "airbud"
 ```
 
 Airbud doesn't care.
 
 ### Example: simple
 
-A common usecase is getting remote JSON. By default `Airbud.json` will already:
+A common usecase is getting remote JSON. By default `airbud.json()` will already:
 
   - Timeout each single operation in 30 seconds
   - [Retry 5 times over 10 minutes](http://www.wolframalpha.com/input/?i=Sum%5Bx%5Ek+*+5%2C+%7Bk%2C+0%2C+4%7D%5D+%3D+10+*+60+%26%26+x+%3E+0)
@@ -53,7 +53,7 @@ A common usecase is getting remote JSON. By default `Airbud.json` will already:
 In CoffeeScript:
 
 ```coffeescript
-Airbud.json "https://api.github.com/events", (err, events, info) ->
+airbud.json "https://api.github.com/events", (err, events, meta) ->
   if err
     throw err
   console.log events[0].created_at
@@ -74,13 +74,13 @@ var opts   = {
   url: process.env.GITHUB_EVENTS_ENDPOINT,
 };
 
-Airbud.json(opts, function (err, events, info) {
+Airbud.json(opts, function (err, events, meta) {
   if (err) {
     throw err;
   }
 
-  console.log('Number of attempts: '+ info.attempts);
-  console.log('Time it took to complete all attempts: ' + info.totalDuration);
+  console.log('Number of attempts: '+ meta.attempts);
+  console.log('Time it took to complete all attempts: ' + meta.totalDuration);
   console.log('Some auto-parsed JSON: ' + events[0].created_at);
 });
 ```
@@ -101,7 +101,7 @@ opts =
   expectedKey     : "status"
   url             : "https://api.github.com/events"
 
-Airbud.retrieve opts, (err, events, info) ->
+Airbud.retrieve opts, (err, events, meta) ->
   if err
     throw err
 
@@ -137,9 +137,9 @@ Here are all of Airbud's options and their default values.
 
 30x redirect codes are followed automatically.
 
-## Info
+## Meta
 
-Besides, `err`, `data`, Airbud returns a third argument `info`. It contains some meta data about the operation(s) for your convenience.
+Besides, `err`, `data`, Airbud returns a third argument `meta`. It contains some meta data about the operation(s) for your convenience.
 
 ```coffeescript
 # The HTTP status code returned
