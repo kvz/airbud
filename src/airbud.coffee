@@ -3,73 +3,65 @@ fs      = require "fs"
 retry   = require "retry"
 
 class Airbud
-  @retrieve: (options, cb) ->
-    if typeof options == "string"
-      options = url: options
-
-    airbud = new AirbudInstance options
-    return airbud.retrieve cb
-
-  @json: (options, cb) ->
-    if typeof options == "string"
-      options = url: options
-
-    options.parseJson = true
-
-    airbud = new AirbudInstance options
-    return airbud.retrieve cb
-
-class AirbudInstance
-  constructor: ({
-    @url,
-    @operationTimeout,
-    @retries,
-    @factor,
-    @minInterval,
-    @maxInterval,
-    @randomize,
-    @parseJson,
-    @expectedKey,
-    @expectedStatus,
-  } = {}) ->
-    # The URL to retrieve
-    @url ?= null
-
+  @defaults:
     # Timeout of a single operation
-    @operationTimeout ?= 30000
+    operationTimeout: 30000
 
     # Retry 5 times over 10 minutes
     # http://www.wolframalpha.com/input/?i=Sum%5Bx%5Ek+*+5%2C+%7Bk%2C+0%2C+4%7D%5D+%3D+10+*+60+%26%26+x+%3E+0
     # The maximum amount of times to retry the operation
-    @retries ?= 4
+    retries: 4
 
     # The exponential factor to use
-    @factor ?= 2.99294
+    factor: 2.99294
 
     # The number of milliseconds before starting the first retry
-    @minInterval ?= 5 * 1000
+    minInterval: 5 * 1000
 
     # The maximum number of milliseconds between two retries
-    @maxInterval ?= Infinity
+    maxInterval: Infinity
 
     # Randomizes the intervals by multiplying with a factor between 1 to 2
-    @randomize ?= true
+    randomize: true
 
     # Automatically parse json
-    @parseJson ?= null
+    parseJson: null
 
     # A key to find in the rootlevel of the parsed json.
     # If not found, Airbud will error out
-    @expectedKey ?= null
+    expectedKey: null
 
     # An array of allowed HTTP Status codes. If specified,
-    # Airbud will error out if the actual status doesn't match
-    @expectedStatus ?= "20x"
+    # Airbud will error out if the actual status doesn't match.
+    # 30x redirect codes are followed automatically.
+    expectedStatus: "20x"
 
-    # Validate
-    if !@url
-      err = new Error "You did not specify a url to retrieve"
-      return cb err
+  @json: (options, cb) ->
+    airbud = new Airbud options, parseJson: true
+
+    Airbud.retrieve airbud, cb
+
+  @retrieve: (options, cb) ->
+    if options instanceof Airbud
+      airbud = options
+    else
+      airbud = new Airbud options
+
+    try
+      airbud.retrieve cb
+    catch err
+      err.message = "Got an error while retrieving #{airbud.url}. #{err}"
+      cb err
+
+  constructor: (optionSets...) ->
+    optionSets.unshift Airbud.defaults
+
+    for options in optionSets
+      if typeof options == "string"
+        options = url: options
+
+      for key, val of options
+        this[key] = val
 
     # Normalize expectedStatus as we allow these input formats:
     #  - RegExp
@@ -113,17 +105,22 @@ class AirbudInstance
           return
 
         totalDuration = +new Date - totalStart
-        info          =
+        meta          =
           statusCode       : res?.statusCode
           errors           : operation.errors()
           attempts         : operation.attempts()
           totalDuration    : totalDuration
           operationDuration: operationDurations / operation.attempts()
         returnErr = if err then operation.mainError() else null
-        cb returnErr, data, info
+        cb returnErr, data, meta
     , cbOperationTimeout
 
   _execute: (cb) ->
+    # Validate
+    if !@url
+      err = new Error "You did not specify a url to retrieve"
+      return cb err
+
     if @url.indexOf("file://") == 0
       # Url can also be local json to inject test fixtures
       path = @url.substr(7, @url.length).split("?")[0]

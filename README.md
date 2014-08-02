@@ -53,7 +53,7 @@ A common usecase is getting remote JSON. By default `Airbud.json` will already:
 In CoffeeScript:
 
 ```coffeescript
-Airbud.json "https://api.github.com/events", (err, events, info) ->
+Airbud.json "https://api.github.com/events", (err, events, meta) ->
   if err
     throw err
   console.log events[0].created_at
@@ -74,13 +74,13 @@ var opts   = {
   url: process.env.GITHUB_EVENTS_ENDPOINT,
 };
 
-Airbud.json(opts, function (err, events, info) {
+Airbud.json(opts, function (err, events, meta) {
   if (err) {
     throw err;
   }
 
-  console.log('Number of attempts: '+ info.attempts);
-  console.log('Time it took to complete all attempts: ' + info.totalDuration);
+  console.log('Number of attempts: '+ meta.attempts);
+  console.log('Time it took to complete all attempts: ' + meta.totalDuration);
   console.log('Some auto-parsed JSON: ' + events[0].created_at);
 });
 ```
@@ -101,7 +101,7 @@ opts =
   expectedKey     : "status"
   url             : "https://api.github.com/events"
 
-Airbud.retrieve opts, (err, events, info) ->
+Airbud.retrieve opts, (err, events, meta) ->
   if err
     throw err
 
@@ -115,31 +115,43 @@ Some other tricks up Airbud's sleeves are `expectedKey` and `expectedStatus`, to
 
 Here are all of Airbud's options and their default values.
 
-`url` - The URL to retrieve. Default is `null`
+```coffeescript
+# Timeout of a single operation
+operationTimeout: 30000
 
-`operationTimeout` - Timeout of a single operation in milliseconds. Default is `30000`
+# Retry 5 times over 10 minutes
+# http://www.wolframalpha.com/input/?i=Sum%5Bx%5Ek+*+5%2C+%7Bk%2C+0%2C+4%7D%5D+%3D+10+*+60+%26%26+x+%3E+0
+# The maximum amount of times to retry the operation
+retries: 4
 
-`retries` - The maximum amount of times to retry the operation. Default is `4`
+# The exponential factor to use
+factor: 2.99294
 
-`factor` - The exponential factor to use. Default is `2.99294`
+# The number of milliseconds before starting the first retry
+minInterval: 5 * 1000
 
-`minInterval` - The number of milliseconds before starting the first retry. Default is `5000`
+# The maximum number of milliseconds between two retries
+maxInterval: Infinity
 
-`maxInterval` - The maximum number of milliseconds between two retries. Default is `Infinity`
+# Randomizes the intervals by multiplying with a factor between 1 to 2
+randomize: true
 
-`randomize` - Randomizes the intervals by multiplying with a factor between 1 to 2. Default is `true`
+# Automatically parse json
+parseJson: null
 
-`parseJson` - Automatically parse JSON. Default is `null`, but default is `true` for `Airbud.json()`
+# A key to find in the rootlevel of the parsed json.
+# If not found, Airbud will error out
+expectedKey: null
 
-`expectedKey` - A key to find in the rootlevel of the parsed JSON. If not found, Airbud will error out. Default is `null`
+# An array of allowed HTTP Status codes. If specified,
+# Airbud will error out if the actual status doesn't match.
+# 30x redirect codes are followed automatically.
+expectedStatus: "20x"
+```
 
-`expectedStatus` - An array of allowed HTTP Status codes. If specified,. Airbud will error out if the actual status doesn't match. Default is `"20x"`
+## Meta
 
-30x redirect codes are followed automatically.
-
-## Info
-
-Besides, `err`, `data`, Airbud returns a third argument `info`. It contains some meta data about the operation(s) for your convenience.
+Besides, `err`, `data`, Airbud returns a third argument `meta`. It contains some meta data about the operation(s) for your convenience.
 
 ```coffeescript
 # The HTTP status code returned
