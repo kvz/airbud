@@ -84,7 +84,7 @@ class Airbud
         .replace /x/g, "\\d"
       @expectedStatus = new RegExp "^#{@expectedStatus}$"
 
-  retrieve: (cb) ->
+  retrieve: (mainCb) ->
     operation = retry.operation
       retries   : @retries
       factor    : @factor
@@ -97,7 +97,7 @@ class Airbud
     if @operationTimeout?
       cbOperationTimeout =
         timeout: @operationTimeout
-        cb     : ->
+        cb     : =>
           msg = "Operation timeout of #{@operationTimeout}ms reached."
           err = new Error msg
           return operation.retry err
@@ -119,7 +119,7 @@ class Airbud
           totalDuration    : totalDuration
           operationDuration: operationDurations / operation.attempts()
         returnErr = if err then operation.mainError() else null
-        cb returnErr, data, meta
+        mainCb returnErr, data, meta
     , cbOperationTimeout
 
   _execute: (cb) ->
@@ -161,9 +161,9 @@ class Airbud
 
     try
       data = JSON.parse data
-    catch e
-      e.message = "Got an error while parsing json for #{@url}. #{e}"
-      return cb e, data, res
+    catch err
+      err.message = "Got an error while parsing json for #{@url}. #{err}"
+      return cb err, data, res
 
     if @expectedKey? && !data[@expectedKey]?
       msg  = "Invalid body received when fetching '#{@url}'. \n"
