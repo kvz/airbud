@@ -94,13 +94,14 @@ class Airbud
 
     # Setup timeouts for single operation
     cbOperationTimeout = null
+    timeoutErr         = null
+
     if @operationTimeout?
       cbOperationTimeout =
         timeout: @operationTimeout
         cb     : =>
-          msg = "Operation timeout of #{@operationTimeout}ms reached."
-          err = new Error msg
-          return operation.retry err
+          msg        = "Operation timeout of #{@operationTimeout}ms reached."
+          timeoutErr = new Error msg
 
     totalStart         = +new Date
     operationDurations = 0
@@ -108,6 +109,12 @@ class Airbud
       operationStart = +new Date
       @_execute (err, data, res) ->
         operationDurations += +new Date - operationStart
+
+        if timeoutErr
+          err = timeoutErr
+
+        timeoutErr = null
+
         if operation.retry(err)
           return
 
