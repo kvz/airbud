@@ -1,4 +1,6 @@
-http = require "http"
+http  = require "http"
+debug = require("debug")("Airbud:fakeserver")
+util  = require "util"
 
 class Fakeserver
   requestCnt  : 0
@@ -7,7 +9,13 @@ class Fakeserver
     params.delay         ?= {}
     params.redirect      ?= {}
     params.port          ?= 7000
-    @requestCnt =  0
+    @requestCnt           =  0
+    expectedRequests      = 1
+
+    if (maybe = Object.keys(params.delay).length) >= expectedRequests
+      expectedRequests = maybe
+    if (maybe = Object.keys(params.redirect).length) >= expectedRequests
+      expectedRequests = maybe
 
     server = http.createServer (req, res) =>
       cnt      = ++@requestCnt
@@ -36,11 +44,17 @@ class Fakeserver
         res.writeHead 202,
           "content-type": "application/json"
         res.end '{ "msg": "OK" }'
-        try
-          # Might have been closed by Airbud already due to delay param
-          server.close()
-        catch e
-          console.log e
+
+
+        debug "#{cnt} of #{expectedRequests}"
+        if cnt >= expectedRequests
+          debug "Closing server"
+          try
+            # Might have been closed by Airbud already due to delay param
+            server.close()
+          catch e
+            console.log e
+
       , delay
     server.listen params.port
     return "http://localhost:#{params.port}"

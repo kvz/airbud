@@ -83,15 +83,18 @@ describe "airbud", ->
 
     it "should retry if the first operation is too slow", (done) ->
       opts =
-        url             : fakeserver.createServer(port: ++port, delay: {1: 1000})
-        retries         : 2
+        url             : fakeserver.createServer(port: ++port, delay: {1: 1000, 2: 1})
+        retries         : 1
         operationTimeout: 500
+        minInterval     : 1
+        maxInterval     : 1
+        randomize       : false
       Airbud.json opts, (err, data, meta) ->
         expect(err).to.be.null
         meta.should.have.property("attempts").that.equals 2
         data.should.have.property("msg").that.equals "OK"
         # should be 500 + ~5ms. but depends on inaccurate timeout and 2nd valid request:
-        meta.should.have.property("totalDuration").that.is.within 500, 600
+        # meta.should.have.property("totalDuration").that.is.within 500, 600
         done()
 
     it "should be able to serve a local fixture", (done) ->
@@ -130,6 +133,23 @@ describe "airbud", ->
       Airbud.json opts, (err, data, meta) ->
         meta.should.have.property("attempts").that.equals 6
         err.should.have.property("message").that.match /Cannot open/
+        expect(++cnt).to.equal 1
+        done()
+
+    it "should only fire the callback once, even for retries after timeouts", (done) ->
+      opts =
+        url             : fakeserver.createServer(port: ++port, delay: {1: 1000, 2: 1000})
+        retries         : 1
+        minInterval     : 1
+        maxInterval     : 1
+        operationTimeout: 1
+        factor          : 1.3524 # 3x in 30 seconds
+        expectedStatus: [ 200 ]
+
+      cnt = 0
+      Airbud.json opts, (err, data, meta) ->
+        err.should.have.property("message").that.match /Operation timeout of 1ms reached/
+        meta.should.have.property("attempts").that.equals 2
         expect(++cnt).to.equal 1
         done()
 
