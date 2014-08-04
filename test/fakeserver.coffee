@@ -9,7 +9,7 @@ class Fakeserver
     params.delay         ?= {}
     params.redirect      ?= {}
     params.port          ?= 7000
-    @requestCnt           =  0
+    @requestCnt           = 0
     expectedRequests      = 1
 
     if (maybe = Object.keys(params.delay).length) >= expectedRequests
