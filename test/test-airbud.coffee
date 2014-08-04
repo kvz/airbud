@@ -93,8 +93,8 @@ describe "airbud", ->
         expect(err).to.be.null
         data.should.have.property("msg").that.equals "OK"
         meta.should.have.property("attempts").that.equals 3
-        # should be 2x operationTimeout, then the 3rd try is quick. So 101ms, but throwing in some inaccuracy:
-        meta.should.have.property("totalDuration").that.is.within 100, 200
+        # should be 2x operationTimeout, then the 3rd try is quick. So 201ms, but throwing in some inaccuracy:
+        meta.should.have.property("totalDuration").that.is.within 100, 250
         done()
 
     it "should be able to serve a local fixture", (done) ->

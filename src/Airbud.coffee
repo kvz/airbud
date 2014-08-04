@@ -95,6 +95,29 @@ class Airbud
     # Setup timeouts for single operation
     cbOperationTimeout = null
     timeoutErr         = null
+    operationStart     = null
+    calledCallbacks    = {}
+
+    cb = (err, data, res) =>
+      if calledCallbacks[operationStart]
+        return
+
+      calledCallbacks[operationStart] = true
+      operationDurations += +new Date - operationStart
+
+      if operation.retry(err)
+        return
+
+      totalDuration = +new Date - totalStart
+      meta          =
+        statusCode       : res?.statusCode
+        errors           : operation.errors()
+        attempts         : operation.attempts()
+        totalDuration    : totalDuration
+        operationDuration: operationDurations / operation.attempts()
+      returnErr = if err then operation.mainError() else null
+
+      mainCb returnErr, data, meta
 
     if @operationTimeout?
       cbOperationTimeout =
@@ -102,32 +125,14 @@ class Airbud
         cb     : =>
           msg        = "Operation timeout of #{@operationTimeout}ms reached."
           timeoutErr = new Error msg
+          cb timeoutErr
 
     totalStart         = +new Date
     operationDurations = 0
     operation.attempt (currentAttempt) =>
       operationStart = +new Date
-      @_execute (err, data, res) ->
-        operationDurations += +new Date - operationStart
-
-        if timeoutErr
-          err = timeoutErr
-
-        timeoutErr = null
-
-        if operation.retry(err)
-          return
-
-        totalDuration = +new Date - totalStart
-        meta          =
-          statusCode       : res?.statusCode
-          errors           : operation.errors()
-          attempts         : operation.attempts()
-          totalDuration    : totalDuration
-          operationDuration: operationDurations / operation.attempts()
-        returnErr = if err then operation.mainError() else null
-
-        mainCb returnErr, data, meta
+      calledCallbacks[operationStart] = false
+      @_execute cb
     , cbOperationTimeout
 
   _execute: (cb) ->
