@@ -126,6 +126,7 @@ class Airbud
           totalDuration    : totalDuration
           operationDuration: operationDurations / operation.attempts()
         returnErr = if err then operation.mainError() else null
+
         mainCb returnErr, data, meta
     , cbOperationTimeout
 

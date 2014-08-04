@@ -83,18 +83,16 @@ describe "airbud", ->
 
     it "should retry if the first operation is too slow", (done) ->
       opts =
-        url             : fakeserver.createServer(port: ++port, delay: {1: 1000, 2: 1})
-        retries         : 1
+        url             : fakeserver.createServer(port: ++port, delay: {1: 1000, 2: 1000, 3: 1})
+        retries         : 2
         operationTimeout: 500
         minInterval     : 1
         maxInterval     : 1
         randomize       : false
       Airbud.json opts, (err, data, meta) ->
-        expect(err).to.be.null
-        meta.should.have.property("attempts").that.equals 2
-        data.should.have.property("msg").that.equals "OK"
+        meta.should.have.property("attempts").that.equals 3
         # should be 500 + ~5ms. but depends on inaccurate timeout and 2nd valid request:
-        # meta.should.have.property("totalDuration").that.is.within 500, 600
+        meta.should.have.property("totalDuration").that.is.within 500, 600
         done()
 
     it "should be able to serve a local fixture", (done) ->
