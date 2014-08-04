@@ -98,7 +98,7 @@ class Airbud
     operationStart     = null
     calledCallbacks    = {}
 
-    cb = (err, data, res) =>
+    cb = (err, data, res) ->
       if calledCallbacks[operationStart]
         return
 

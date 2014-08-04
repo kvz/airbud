@@ -46,9 +46,9 @@ class Fakeserver
         res.end '{ "msg": "OK" }'
 
 
-        debug "#{cnt} of #{expectedRequests}"
+        # debug "#{cnt} of #{expectedRequests}"
         if cnt >= expectedRequests
-          debug "Closing server"
+          # debug "Closing server"
           try
             # Might have been closed by Airbud already due to delay param
             server.close()
