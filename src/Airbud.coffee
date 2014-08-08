@@ -114,7 +114,7 @@ class Airbud
         errors           : operation.errors()
         attempts         : operation.attempts()
         totalDuration    : totalDuration
-        operationDuration: operationDurations / operation.attempts()
+        operationDuration: Math.floor(operationDurations / operation.attempts())
       returnErr = if err then operation.mainError() else null
 
       mainCb returnErr, data, meta
