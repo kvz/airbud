@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "debug": "^1.0.4",
-    "request": "2.36.0",
+    "request": "2.40.0",
     "retry": "0.6.0"
   },
   "devDependencies": {
