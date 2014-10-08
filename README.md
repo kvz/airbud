@@ -109,25 +109,15 @@ Airbud.retrieve opts, (err, events, meta) ->
 ```
 
 
-### Example: 3 retries in one minute
-
-You don't have to use environment vars or the local fixture feature. You can also use Airbud as a wrapper around request to profit from retries with exponential backoffs. Here's how to customize the retry flow in CoffeeScript:
+### Example: 3 retries in one minute, retry after 3s timeout for each operation
 
 ```coffeescript
 opts =
   url             : "https://api2.transloadit.com/instances"
   retries         : 2
   factor          : 1.73414
-  minInterval     : 3000
-  maxInterval     : 3000
   expectedKey     : "instances"
   operationTimeout: 3000
-
-Airbud.retrieve opts, (err, events, meta) ->
-  if err
-    throw err
-
-  console.log events
 ```
 
 Some other tricks up Airbud's sleeves are `expectedKey` and `expectedStatus`, to make it error out when you get invalid data, without you writing all the extra `if` and maybes.
