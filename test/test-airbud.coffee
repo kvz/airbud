@@ -155,7 +155,7 @@ describe "airbud", ->
 
     it "should not throw exception for unresolvable domain", (done) ->
       opts =
-        url: "http://asd.asdasdasd.asdfsadf.com/non-existing.json"
+        url: "http://asd.asdasdasd.asdfnon-existingsadf.com/non-existing.json"
 
       Airbud.json opts, (err, data, meta) ->
         meta.should.have.property("attempts").that.equals 2
