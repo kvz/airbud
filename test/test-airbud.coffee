@@ -24,7 +24,9 @@ describe "airbud", ->
           "user-Agent": "Airbud"
       Airbud.retrieve opts, (err, data, meta) ->
         expect(err).to.be.null
-        data.should.equal "{\"msg\":\"OK\",\"received_headers\":{\"user-agent\":\"Airbud\",\"host\":\"localhost:7001\",\"connection\":\"keep-alive\"}}"
+        parsed = JSON.parse data
+        expect(parsed).to.have.property("msg").that.equals "OK"
+        expect(parsed).to.have.property("received_headers").with.property("user-agent").that.equals "Airbud"
         meta.should.have.property("statusCode").that.equals 202
         meta.should.have.property("attempts").that.equals 1
         done()
