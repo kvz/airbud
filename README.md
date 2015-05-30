@@ -159,6 +159,9 @@ expectedKey: null
 # Airbud will error out if the actual status doesn't match.
 # 30x redirect codes are followed automatically.
 expectedStatus: "20x"
+
+# Custom headers to submit in the request
+headers: []
 ```
 
 ## Meta

@@ -43,7 +43,14 @@ class Fakeserver
 
         res.writeHead 202,
           "content-type": "application/json"
-        res.end '{ "msg": "OK" }'
+
+        payload =
+          msg: "OK"
+
+        if req.headers?
+          payload.received_headers = req.headers
+
+        res.end JSON.stringify payload
 
 
         # debug "#{cnt} of #{expectedRequests}"

@@ -36,6 +36,9 @@ class Airbud
     # 30x redirect codes are followed automatically.
     expectedStatus: "20x"
 
+    # Custom headers to submit in the request
+    headers: []
+
   @getDefaults: ->
     return Airbud._defaults
 
@@ -153,7 +156,13 @@ class Airbud
 
       return
 
-    request.get @url, (err, res, buf) =>
+    reqOpts =
+      url: @url
+
+    if @headers?
+      reqOpts.headers = @headers
+
+    request.get reqOpts, (err, res, buf) =>
       if err
         return cb err, buf, res
 

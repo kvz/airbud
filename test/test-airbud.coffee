@@ -20,9 +20,11 @@ describe "airbud", ->
     it "should not try to parse JSON by default", (done) ->
       opts =
         url: fakeserver.createServer(port: ++port)
+        headers:
+          "user-Agent": "Airbud"
       Airbud.retrieve opts, (err, data, meta) ->
         expect(err).to.be.null
-        data.should.equal "{ \"msg\": \"OK\" }"
+        data.should.equal "{\"msg\":\"OK\",\"received_headers\":{\"user-agent\":\"Airbud\",\"host\":\"localhost:7001\",\"connection\":\"keep-alive\"}}"
         meta.should.have.property("statusCode").that.equals 202
         meta.should.have.property("attempts").that.equals 1
         done()
