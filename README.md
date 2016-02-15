@@ -25,7 +25,7 @@ To use Airbud, first require it
 
 In JavaScript
 
-```
+```javascript
 var Airbud = require('airbud');
 ```
 
