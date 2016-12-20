@@ -5,8 +5,6 @@
 [![Development Dependency Status](https://david-dm.org/kvz/airbud/dev-status.png?theme=shields.io)](https://david-dm.org/kvz/airbud#info=devDependencies)
 <!-- /badges -->
 
-# airbud
-
 Retrieving stuff from the web is unreliable. Airbud adds retries for production, and fixture support for test.
 
 ![air_bud_-_golden_receiver](https://cloud.githubusercontent.com/assets/26752/3387034/c4cc56d0-fc79-11e3-8d0a-09ef9280bb0f.jpg)
@@ -27,7 +25,7 @@ To use Airbud, first require it
 
 In JavaScript
 
-```
+```javascript
 var Airbud = require('airbud');
 ```
 
