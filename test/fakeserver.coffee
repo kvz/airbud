@@ -1,5 +1,5 @@
 http  = require "http"
-debug = require("debug")("Airbud:fakeserver")
+debug = require("depurar")("Airbud")
 util  = require "util"
 
 class Fakeserver

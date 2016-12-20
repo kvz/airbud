@@ -1,6 +1,6 @@
 should     = require("chai").should()
 Fakeserver = require "./fakeserver"
-debug      = require("debug")("Airbud:test-airbud")
+debug      = require("depurar")("Airbud")
 util       = require "util"
 expect     = require("chai").expect
 Airbud     = require "../src/Airbud"
