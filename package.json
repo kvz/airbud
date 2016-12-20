@@ -20,11 +20,13 @@
     "retry": "0.8.0"
   },
   "devDependencies": {
-    "should": "7.1.0",
-    "coffee-script": "1.10.0",
     "chai": "3.2.0",
+    "coffee-script": "1.10.0",
+    "coffeelint": "1.12.1",
+    "fakefile": "^0.0.8",
     "mocha": "2.3.2",
-    "coffeelint": "1.12.1"
+    "next-update": "^1.5.1",
+    "should": "7.1.0"
   },
   "repository": {
     "type": "git",
@@ -34,7 +36,14 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test": "make test"
+    "build": "coffee -c -o lib src",
+    "lint": "coffeelint --file ./coffeelint.json src",
+    "release:major": "env SEMANTIC=major npm run release",
+    "release:minor": "env SEMANTIC=minor npm run release",
+    "release:patch": "env SEMANTIC=patch npm run release",
+    "release": "npm version ${SEMANTIC:-patch} -m \"Release %s\" && npm run build && git push && git push --tags && npm publish",
+    "test": "npm run build && env DEBUG=Airbud:* mocha --compilers coffee:coffee-script --require \"coffee-script/register\" --reporter spec test/ --grep \"${GREP}\"",
+    "upgrade:modules": "next-update --keep true --tldr"
   },
   "license": "MIT",
   "main": "./index"
