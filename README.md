@@ -1,12 +1,6 @@
 <!-- badges/ -->
 [![Build Status](https://secure.travis-ci.org/kvz/airbud.png?branch=master)](http://travis-ci.org/kvz/airbud "Check this project's build status on TravisCI")
-[![NPM version](http://badge.fury.io/js/airbud.png)](https://npmjs.org/package/airbud "View this project on NPM")
-[![Dependency Status](https://david-dm.org/kvz/airbud.png?theme=shields.io)](https://david-dm.org/kvz/airbud)
-[![Development Dependency Status](https://david-dm.org/kvz/airbud/dev-status.png?theme=shields.io)](https://david-dm.org/kvz/airbud#info=devDependencies)
 <!-- /badges -->
-
-
-**Consider using <https://github.com/sindresorhus/got> instead, which has a similar purpose but a much larger community to maintain it**
 
 Retrieving stuff from the web is unreliable. Airbud adds retries for production, and fixture support for test.
 
