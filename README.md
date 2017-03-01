@@ -205,7 +205,7 @@ Releasing a new version to npmjs.org can be done via `make release-patch` (or mi
 
 ## Related
 
-- [got](https://github.com/sindresorhus/got) has a similar purpose but a much larger community to maintain it. Consider using it. Airbud however does provide `meta` information (in addition to `err` and `data` which are similar to got), that passes you the number of retries involved as well as the time it took for the first successful operation to complete.
+- [got](https://github.com/sindresorhus/got) has a similar purpose but a much larger community to maintain it. Consider using it. Airbud however does provide `meta` information (in addition to `err` and `data` which are similar to got), that passes you the number of retries involved as well as the time it took for the first successful operation to complete. Airbud also supports `file://` URLs meaning you could substitute URLs with fixtures easily for your project's testing purposes.
 
 ## License
 
