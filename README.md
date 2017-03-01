@@ -198,7 +198,7 @@ To single out a test use `make test GREP=30x`
 
 ### Release
 
-Releasing a new version to npmjs.org can be done via `make release-major` (or minor / patch, depending on the [semantic versioning](http://semver.org/) impact of your changes). This:
+Releasing a new version to npmjs.org can be done via `make release-patch` (or minor / major, depending on the [semantic versioning](http://semver.org/) impact of your changes). This:
 
  - updates the `package.json`
  - saves a release commit with the updated version in Git
@@ -209,18 +209,10 @@ Releasing a new version to npmjs.org can be done via `make release-major` (or mi
 
 * [Kevin van Zonneveld](https://twitter.com/kvz)
 
+## Related
+
+- [got](https://github.com/sindresorhus/got) has a similar purpose but a much larger community to maintain it. Consider using it. Airbud however does provide `meta` information (in addition to `err` and `data` which are similar to got), that passes you the number of retries involved as well as the time it took for the first successful operation to complete.
+
 ## License
 
 [MIT Licensed](LICENSE).
-
-## Sponsor Development
-
-Like this project? Consider a donation.
-You'd be surprised how rewarding it is for me see someone spend actual money on these efforts, even if just $1.
-
-<!-- badges/ -->
-[![Gittip donate button](http://img.shields.io/gittip/kvz.png)](https://www.gittip.com/kvz/ "Sponsor the development of airbud via Gittip")
-[![Flattr donate button](http://img.shields.io/flattr/donate.png?color=yellow)](https://flattr.com/submit/auto?user_id=kvz&url=https://github.com/kvz/airbud&title=airbud&language=&tags=github&category=software "Sponsor the development of airbud via Flattr")
-[![PayPal donate button](http://img.shields.io/paypal/donate.png?color=yellow)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kevin%40vanzonneveld%2enet&lc=NL&item_name=Open%20source%20donation%20to%20Kevin%20van%20Zonneveld&currency_code=USD&bn=PP-DonationsBF%3abtn_donate_SM%2egif%3aNonHosted "Sponsor the development of airbud via Paypal")
-[![BitCoin donate button](http://img.shields.io/bitcoin/donate.png?color=yellow)](https://coinbase.com/checkouts/19BtCjLCboRgTAXiaEvnvkdoRyjd843Dg2 "Sponsor the development of airbud via BitCoin")
-<!-- /badges -->
