@@ -27,6 +27,9 @@ class Airbud
     # Automatically parse json
     parseJson: null
 
+    # Includes the full response object in the meta property of the main callback
+    fetchResponseObj: false
+
     # A key to find in the rootlevel of the parsed json.
     # If not found, Airbud will error out
     expectedKey: null
@@ -101,7 +104,7 @@ class Airbud
     operationStart     = null
     calledCallbacks    = {}
 
-    cb = (err, data, res) ->
+    cb = (err, data, res) =>
       if calledCallbacks[operationStart]
         return
 
@@ -119,6 +122,9 @@ class Airbud
         totalDuration    : totalDuration
         operationDuration: Math.floor(operationDurations / operation.attempts())
       returnErr = if err then operation.mainError() else null
+
+      if @fetchResponseObj
+        meta.responseObj = res
 
       mainCb returnErr, data, meta
 
