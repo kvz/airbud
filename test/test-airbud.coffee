@@ -193,3 +193,11 @@ describe "airbud", ->
         meta.should.have.property("attempts").that.equals 10
         err.should.have.property("message").that.match /Invalid protocol: httpasd:/
         done()
+
+    it "should include the full response object if so desired", (done) ->
+      Airbud.setDefaults
+        fetchResponseObj: true
+
+      Airbud.json "http://api2.transloadit.com/", (err, data, meta) ->
+        meta.should.have.property("responseObj")
+        done()
