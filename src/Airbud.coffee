@@ -42,6 +42,9 @@ class Airbud
     # Custom headers to submit in the request
     headers: []
 
+    # Custom auth to submit in the request
+    auth: {}
+
   @getDefaults: ->
     return Airbud._defaults
 
@@ -167,6 +170,9 @@ class Airbud
 
     if @headers?
       reqOpts.headers = @headers
+
+    if @auth?
+      reqOpts.auth = @auth
 
     request.get reqOpts, (err, res, buf) =>
       if err
