@@ -43,7 +43,7 @@ class Airbud
     headers: []
 
     # Custom auth to submit in the request
-    auth: {}
+    auth: null
 
   @getDefaults: ->
     return Airbud._defaults
